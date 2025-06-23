@@ -11,6 +11,7 @@ import connectToDatabase from "./config/db";
 import { APP_ORIGIN, NODE_ENV, PORT } from "./constants/env";
 import errorHandler from "./middlewares/errorHandler";
 import { OK } from "./constants/http";
+import authRoutes from "./routes/auth.route";
 
 const app = express();
 
@@ -24,13 +25,15 @@ app.use(
 );
 app.use(cookieParser());
 
-// health check
-app.get("/", (_, res) => {
+// Server health check
+app.get("/", async (req, res, next) => {
   res.status(OK).json({
     status: "healthy",
   });
   return;
 });
+
+app.use("/auth", authRoutes);
 
 // global error handler
 app.use(errorHandler);
