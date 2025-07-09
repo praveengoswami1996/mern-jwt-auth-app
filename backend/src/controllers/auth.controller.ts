@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import catchErrors from "../utils/catchError";
-import { createAccount, loginUser, refreshUserAccessToken } from "../services/auth.service";
+import { createAccount, loginUser, refreshUserAccessToken, verifyEmail } from "../services/auth.service";
 import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
 import { clearAuthCookies, getAccessTokenCookieOptions, getRefreshTokenCookieOptions, setAuthCookies } from "../utils/cookies";
-import { loginSchema, registerSchema } from "./auth.schemas";
+import { loginSchema, registerSchema, verificationCodeSchema } from "./auth.schemas";
 import { verifyToken } from "../utils/jwt";
 import SessionModel from "../models/session.model";
 import appAssert from "../utils/appAssert";
@@ -80,5 +80,21 @@ export const refreshHandler = catchErrors(
             .json({
                 message: "Access token refreshed"
             });
+    }
+)
+
+export const verifyEmailHandler = catchErrors(
+    async (req: Request, res: Response) => {
+        // Step 1: Get the verification code from the request params
+        const verificationCode  = verificationCodeSchema.parse(req.params.code);
+
+        // Step 2: Call the service
+        await verifyEmail(verificationCode)
+
+        // Step 3: Return the response
+        return res.status(OK).json({
+            message: "Email was successfully verified"
+        })
+
     }
 )

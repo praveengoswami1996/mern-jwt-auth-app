@@ -1,11 +1,14 @@
-import { CONFLICT, UNAUTHORIZED } from "../constants/http";
+import { APP_ORIGIN } from "../constants/env";
+import { CONFLICT, INTERNAL_SERVER_ERROR, NOT_FOUND, UNAUTHORIZED } from "../constants/http";
 import VerificationCodeType from "../constants/verificationCodeTypes";
 import SessionModel from "../models/session.model";
 import UserModel from "../models/user.model";
 import VerificationCodeModel from "../models/verificationCode.model";
 import appAssert from "../utils/appAssert";
 import { ONE_DAY_MS, oneYearFromNow, thirtyDaysFromNow } from "../utils/date";
+import { getVerifyEmailTemplate } from "../utils/emailTemplates";
 import { RefreshTokenPayload, refreshTokenSignOptions, signToken, verifyToken } from "../utils/jwt";
+import sendMail from "../utils/sendMail";
 
 export type CreateAccountParams = {
   email: string;
@@ -44,7 +47,16 @@ export const createAccount = async (data: CreateAccountParams) => {
     expiresAt: oneYearFromNow(),
   });
 
-  // 4. Send Verification Email (Will do it later)
+  // 4. Send Verification Email
+  const url = `${APP_ORIGIN}/email/verify/${verificationCode._id}`
+  const { error } = await sendMail({
+    to: user.email,
+    ...getVerifyEmailTemplate(url)
+  })
+  
+  if(error) {
+    console.log(error);
+  }
 
   /*
       5. Create Session
@@ -145,5 +157,31 @@ export const refreshUserAccessToken = async (refreshToken: string) => {
   return {
     accessToken,
     newRefreshToken
+  }
+}
+
+export const verifyEmail = async (code: string) => {
+  // Step 1: Get the verification code
+  const validCode = await VerificationCodeModel.findOne({
+    _id: code,
+    type: VerificationCodeType.EmailVerification,
+    expiresAt: { $gt: new Date() }
+  })
+  appAssert(validCode, NOT_FOUND, "Invalid or expired verification code")
+  
+  // Step 2: Update user to verified true
+  const updatedUser = await UserModel.findByIdAndUpdate(
+    validCode.userId,
+    { verified: true },
+    { new: true }
+  )
+  appAssert(updatedUser, INTERNAL_SERVER_ERROR, "Failed to verify email")
+
+  // Step 3: Delete verification code
+  await validCode.deleteOne();
+  
+  // Step 4: return user
+  return {
+    user: updatedUser.omitPassword()
   }
 }
