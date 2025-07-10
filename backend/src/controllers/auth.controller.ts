@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import catchErrors from "../utils/catchError";
-import { createAccount, loginUser, refreshUserAccessToken, sendPasswordResetEmail, verifyEmail } from "../services/auth.service";
+import { createAccount, loginUser, refreshUserAccessToken, resetPassword, sendPasswordResetEmail, verifyEmail } from "../services/auth.service";
 import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
 import { clearAuthCookies, getAccessTokenCookieOptions, getRefreshTokenCookieOptions, setAuthCookies } from "../utils/cookies";
-import { emailSchema, loginSchema, registerSchema, verificationCodeSchema } from "./auth.schemas";
+import { emailSchema, loginSchema, registerSchema, resetPasswordSchema, verificationCodeSchema } from "./auth.schemas";
 import { verifyToken } from "../utils/jwt";
 import SessionModel from "../models/session.model";
 import appAssert from "../utils/appAssert";
@@ -99,17 +99,32 @@ export const verifyEmailHandler = catchErrors(
     }
 )
 
-export const sendPasswordResetHandler = catchErrors(
+export const sendPasswordResetEmailHandler = catchErrors(
+  async (req: Request, res: Response) => {
+    // Step 1: Validate the email received in the request body
+    const email = emailSchema.parse(req.body.email);
+
+    // Step 2: Send password reset email
+    await sendPasswordResetEmail(email);
+
+    // Step 3: Return response
+    return res.status(OK).json({
+      message: "Password reset email sent",
+    });
+  }
+);
+
+export const resetPasswordHandler = catchErrors(
     async (req: Request, res: Response) => {
-        // Step 1: Validate the email received in the request body
-        const email = emailSchema.parse(req.body.email);
+        // Step 1: Validate the request
+        const request = resetPasswordSchema.parse(req.body);
 
-        // Step 2: Send password reset email
-        await sendPasswordResetEmail(email);
+        // Step 2: Call the service
+        await resetPassword(request);
 
-        // Step 3: Return response
-        return res.status(OK).json({
-            message: "Password reset email sent"
-        })
+        // Step 3: Return the response and also clear the cookies because user has changed the password and he has to login again
+        return clearAuthCookies(res).status(OK).json({
+            message: "Password reset successfully"
+        }) 
     }
 )

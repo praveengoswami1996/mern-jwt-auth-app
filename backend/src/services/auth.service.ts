@@ -5,6 +5,7 @@ import SessionModel from "../models/session.model";
 import UserModel from "../models/user.model";
 import VerificationCodeModel from "../models/verificationCode.model";
 import appAssert from "../utils/appAssert";
+import { hashValue } from "../utils/bcrypt";
 import { fiveMinutesAgo, ONE_DAY_MS, oneHourFromNow, oneYearFromNow, thirtyDaysFromNow } from "../utils/date";
 import { getPasswordResetTemplate, getVerifyEmailTemplate } from "../utils/emailTemplates";
 import { RefreshTokenPayload, refreshTokenSignOptions, signToken, verifyToken } from "../utils/jwt";
@@ -223,5 +224,42 @@ export const sendPasswordResetEmail = async (email: string) => {
   return {
     url,
     emailId: data.id
+  }
+}
+
+type ResetPasswordParams = {
+  password: string;
+  verificationCode: string;
+}
+
+export const resetPassword = async ({ password, verificationCode }: ResetPasswordParams) => {
+  // Step 1: Get the verification code
+  const validCode = await VerificationCodeModel.findOne({
+    _id: verificationCode,
+    type: VerificationCodeType.PasswordReset,
+    expiresAt: { $gt: new Date() }
+  })
+  appAssert(validCode, NOT_FOUND, "Invalid or expired verification code")
+
+  // Step 2: Update user's password if verification code is valid
+  const updatedUser = await UserModel.findByIdAndUpdate(
+    validCode.userId,
+    {
+      password: await hashValue(password), //Hashing password because pre-save middleware won't work here
+    }
+  )
+  appAssert(updatedUser, INTERNAL_SERVER_ERROR, "Failed to reset password");
+  
+  // Step 3: Delete the verification code
+  await validCode.deleteOne();
+
+  // Step 4: Delete all the current sessions of the user
+  await SessionModel.deleteMany({
+    userId: updatedUser._id
+  })
+
+  // Step 5: Return the updated user
+  return {
+    user: updatedUser.omitPassword()
   }
 }

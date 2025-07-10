@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loginHandler, logoutHandler, refreshHandler, registerHandler, sendPasswordResetHandler, verifyEmailHandler } from "../controllers/auth.controller";
+import { loginHandler, logoutHandler, refreshHandler, registerHandler, resetPasswordHandler, sendPasswordResetEmailHandler, verifyEmailHandler } from "../controllers/auth.controller";
 
 const authRoutes = Router();
 
@@ -8,6 +8,7 @@ authRoutes.post("/login", loginHandler);
 authRoutes.get("/refresh", refreshHandler)
 authRoutes.get("/logout", logoutHandler);
 authRoutes.get("/email/verify/:code", verifyEmailHandler);
-authRoutes.post("/password/forgot", sendPasswordResetHandler)
+authRoutes.post("/password/forgot", sendPasswordResetEmailHandler);
+authRoutes.post("/password/reset", resetPasswordHandler);
 
 export default authRoutes;
