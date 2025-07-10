@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import catchErrors from "../utils/catchError";
-import { createAccount, loginUser, refreshUserAccessToken, verifyEmail } from "../services/auth.service";
+import { createAccount, loginUser, refreshUserAccessToken, sendPasswordResetEmail, verifyEmail } from "../services/auth.service";
 import { CREATED, OK, UNAUTHORIZED } from "../constants/http";
 import { clearAuthCookies, getAccessTokenCookieOptions, getRefreshTokenCookieOptions, setAuthCookies } from "../utils/cookies";
-import { loginSchema, registerSchema, verificationCodeSchema } from "./auth.schemas";
+import { emailSchema, loginSchema, registerSchema, verificationCodeSchema } from "./auth.schemas";
 import { verifyToken } from "../utils/jwt";
 import SessionModel from "../models/session.model";
 import appAssert from "../utils/appAssert";
@@ -96,5 +96,20 @@ export const verifyEmailHandler = catchErrors(
             message: "Email was successfully verified"
         })
 
+    }
+)
+
+export const sendPasswordResetHandler = catchErrors(
+    async (req: Request, res: Response) => {
+        // Step 1: Validate the email received in the request body
+        const email = emailSchema.parse(req.body.email);
+
+        // Step 2: Send password reset email
+        await sendPasswordResetEmail(email);
+
+        // Step 3: Return response
+        return res.status(OK).json({
+            message: "Password reset email sent"
+        })
     }
 )
