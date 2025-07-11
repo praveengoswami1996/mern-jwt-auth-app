@@ -11,6 +11,7 @@ import { OK } from "./constants/http";
 import authRoutes from "./routes/auth.route";
 import userRoutes from "./routes/user.route";
 import authenticate from "./middlewares/authenticate";
+import sessionRoutes from "./routes/session.route";
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.get("/", async (req, res, next) => {
 app.use("/auth", authRoutes);
 // Protected Routes
 app.use("/user", authenticate, userRoutes);
+app.use("/sessions", authenticate, sessionRoutes);
 
 // global error handler
 app.use(errorHandler);
