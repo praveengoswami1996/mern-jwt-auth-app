@@ -1,5 +1,4 @@
 "use client"
-
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react"
 import {
   ColorModeProvider,
@@ -8,7 +7,7 @@ import {
 
 export function Provider(props: ColorModeProviderProps) {
   return (
-    <ChakraProvider value={defaultSystem}>
+    <ChakraProvider value={defaultSystem} >
       <ColorModeProvider {...props} />
     </ChakraProvider>
   )
