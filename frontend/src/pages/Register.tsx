@@ -102,7 +102,6 @@ const Register = () => {
     setErrors(validationErrors);
 
     if (Object.keys(validationErrors).length === 0) {
-      console.log("Control yaha par aa raha hai");
       createAccount(formData);
     } else {
       console.log("Form has validation errors : ", validationErrors);
@@ -131,6 +130,7 @@ const Register = () => {
                   type="email"
                   id="email"
                   name="email"
+                  placeholder="Enter your email"
                   value={formData.email}
                   onChange={handleChange}
                   autoFocus
@@ -150,6 +150,7 @@ const Register = () => {
                   type="password"
                   id="password"
                   name="password"
+                  placeholder="Create a password"
                   value={formData.password}
                   onChange={handleChange}
                   color={"#ffffff"}
@@ -168,6 +169,7 @@ const Register = () => {
                   type="password"
                   id="confirmPassword"
                   name="confirmPassword"
+                  placeholder="Re-enter your password"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   color={"#ffffff"}

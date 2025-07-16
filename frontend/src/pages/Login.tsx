@@ -119,6 +119,7 @@ const Login = () => {
                   type="email"
                   id="email"
                   name="email"
+                  placeholder="Enter your email"
                   value={formData.email}
                   onChange={handleChange}
                   autoFocus
@@ -138,6 +139,7 @@ const Login = () => {
                   type="password"
                   id="password"
                   name="password"
+                  placeholder="Enter your password"
                   value={formData.password}
                   onChange={handleChange}
                   color={"#ffffff"}
@@ -149,16 +151,12 @@ const Login = () => {
                 )}
               </FormControl>
               <ChakraLink
-                as={Link}
-                href="/password/forgot"
+                asChild
                 fontSize="sm"
-                textAlign={{
-                  base: "center",
-                  sm: "right",
-                }}
+                textAlign={"right"}
                 color={"#42A5F5"}
               >
-                Forgot password?
+                <Link to={"/password/forgot"}>Forgot password?</Link>
               </ChakraLink>
               <Button
                 type="submit"
