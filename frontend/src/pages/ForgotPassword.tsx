@@ -82,7 +82,7 @@ const ForgotPassword = () => {
             {isSuccess ? (
               <AlertRoot status={"success"} borderRadius={12}>
                 <AlertIndicator />
-                <AlertContent>
+                <AlertContent textAlign={"left"}>
                   <AlertTitle>Password reset email sent</AlertTitle>
                   <AlertDescription>
                     Email sent! Check your inbox for further instructions.
