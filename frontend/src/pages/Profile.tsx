@@ -1,17 +1,15 @@
 import { AlertIndicator, AlertRoot, AlertTitle, Center, Heading, Text } from "@chakra-ui/react";
-import useAuth from "../hooks/useAuth";
+import { useUser } from "@/contexts/UserContext";
 
 const Profile = () => {
-  const { user } = useAuth();
-  //@ts-ignore
-  const { email, verified, createdAt } = user;
+  const user = useUser();
 
   return (
     <Center mt={16} flexDir="column">
       <Heading size={"3xl"} mb={4} color={"#42A5F5"}>
         My Account
       </Heading>
-      {!verified && (
+      {!user.verified && (
         <AlertRoot status="warning" borderRadius={12} w={"fit-content"} mb={3}>
           <AlertIndicator />
           <AlertTitle>Please verify your email</AlertTitle>
@@ -20,13 +18,13 @@ const Profile = () => {
       <Text color="white" mb={2}>
         Email:{" "}
         <Text as="span" color="gray.300">
-          {email}
+          {user.email}
         </Text>
       </Text>
       <Text color="white">
         Created on{" "}
         <Text as="span" color="gray.300">
-          {new Date(createdAt).toLocaleDateString("en-US")}
+          {new Date(user.createdAt).toLocaleDateString("en-US")}
         </Text>
       </Text>
     </Center>
