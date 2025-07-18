@@ -7,13 +7,13 @@ const Settings = () => {
 
   return (
     <Container mt={16}>
-      <Heading size={"3xl"} mb={6} color={"#42A5F5"}>
+      <Heading size={"3xl"} mb={6} color={"#42A5F5"} textAlign={"center"}>
         My Sessions
       </Heading>
       {isPending && <Spinner />}
       {isError && <Text color="red.400">Failed to get sessions.</Text>}
       {isSuccess && (
-        <VStack spaceY={3} align="flex-start">
+        <VStack spaceY={3} maxWidth={"fit"} mx={"auto"}>
           {sessions.map((session) => (
             <SessionCard key={session._id} session={session} />
           ))}
