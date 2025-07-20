@@ -6,6 +6,7 @@ import axios, {
   type AxiosError
 } from "axios";
 import queryClient from "./queryClient";
+import { navigate } from "@/lib/navigation";
 
 interface ErrorResponseData {
   status: number;
@@ -45,10 +46,13 @@ API.interceptors.response.use(
           await TokenRefreshClient.get("/auth/refresh");
           return TokenRefreshClient(error.config)
         } catch {
-          // handle refresh errors by clearing the query cache & redirecting to login
+          // if there was an error in refreshing the accessToken then handle refresh errors by clearing the query cache & redirecting to login
           queryClient.clear();
-          window.localStorage.setItem("redirectUrl", window.location.pathname)
-          window.location.href = `/login`;
+          navigate("/login", {
+            state: {
+              redirectUrl: window.location.pathname
+            }
+          })
         }
       }
 

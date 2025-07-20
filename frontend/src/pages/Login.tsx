@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Flex,
   Box,
@@ -26,15 +26,14 @@ interface FormErrors {
 }
 
 const Login = () => {
+  const location = useLocation();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: ''
   });
   const [errors, setErrors] = useState<FormErrors>({});
-  const redirectUrl = window.localStorage.getItem("redirectUrl") || "/";
-
-  console.log("Ye Dekh Line 36 se", redirectUrl);
+  const redirectUrl = location.state?.redirectUrl || "/";
 
   const {
     mutate: signIn,
@@ -43,12 +42,9 @@ const Login = () => {
   } = useMutation({
     mutationFn: login,
     onSuccess: () => {
-      console.log("Main Chala Hoon");
-      console.log("Ye Dekh Redirect URL", redirectUrl);
       navigate(redirectUrl, {
         replace: true,
       });
-      window.localStorage.removeItem("redirectUrl");
     },
   });
 
