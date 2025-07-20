@@ -70,14 +70,11 @@ export const createAccount = async (data: CreateAccountParams) => {
 
   // 4. Send Verification Email
   const url = `${APP_ORIGIN}/email/verify/${verificationCode._id}`;
-  const { error } = await sendMail({
+  
+  await sendMail({
     to: user.email,
     ...getVerifyEmailTemplate(url),
   });
-
-  if (error) {
-    console.log(error);
-  }
 
   /*
       5. Create Session
@@ -247,21 +244,21 @@ export const sendPasswordResetEmail = async (email: string) => {
     // Step 4: Send verification email
     const url = `${APP_ORIGIN}/password/reset?code=${verificationCode._id}&exp=${expiresAt.getTime()}`;
 
-    const { data, error } = await sendMail({
+    const info = await sendMail({
       to: user.email,
       ...getPasswordResetTemplate(url),
     });
 
     appAssert(
-      data?.id,
+      info?.messageId,
       INTERNAL_SERVER_ERROR,
-      `${error?.name} - ${error?.message}`
+      `Email send failed: No message ID received. Response: ${info?.response}`
     );
 
     // Step 5: Return
     return {
       url,
-      emailId: data.id,
+      emailId: info?.messageId,
     };
   } catch (error: any) {
     console.log("SendPasswordResetError:", error.message);

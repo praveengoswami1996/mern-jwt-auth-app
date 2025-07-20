@@ -1,5 +1,5 @@
-import resend from "../config/resend";
-import { EMAIL_SENDER, NODE_ENV } from "../constants/env";
+import createTransporter from "../config/nodemailerConfig";
+import nodemailer from "nodemailer";
 
 type Params = {
     to: string;
@@ -8,20 +8,34 @@ type Params = {
     html: string;
 }
 
-const getFromEmail = () => NODE_ENV === "development" ? "onboarding@resend.dev" : EMAIL_SENDER;
-
-const getToEmail = (to: string) => NODE_ENV === "development" ? "delivered@resend.dev" : to;
-
 const sendMail = async ({ to, subject, text, html }: Params) => {
-    const { data, error } = await resend.emails.send({
-      from: getFromEmail(),
-      to: getToEmail(to),
-      subject, 
-      text,
-      html
-    });
+  const emailTransporter = await createTransporter();
 
-    return { data, error };
-}
+  if (!emailTransporter) {
+    console.error("Could not create email transporter. Aborting email send.");
+    return;
+  }
+
+  const gmailUser = process.env.GMAIL_USER;
+  if (!gmailUser) {
+    console.error("Error: GMAIL_USER not set in .env file.");
+    return;
+  }
+
+  const mailOptions = {
+    from: gmailUser,
+    to,
+    subject,
+    text,
+    html
+  };
+
+  try {
+    const info = await emailTransporter.sendMail(mailOptions);
+    return info;
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
+};
 
 export default sendMail;
