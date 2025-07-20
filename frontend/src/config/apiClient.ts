@@ -35,7 +35,6 @@ API.interceptors.response.use(
 
   // Will be called on error
   async (error: AxiosError<ErrorResponseData>) => {
-    console.log("Bhai Control Refresh mein bhi aaya hai");
     if(error.response && error.config) {
       const { status, data } = error.response;
 
