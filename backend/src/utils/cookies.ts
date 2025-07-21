@@ -5,9 +5,9 @@ export const REFRESH_PATH = "/auth/refresh";
 const secure = process.env.NODE_ENV !== "development";
 
 const defaults: CookieOptions = {
-    sameSite: "strict",
-    httpOnly: true,
-    secure
+    sameSite: "none", 
+    httpOnly: true, // It ensures cookies cannot be accessed by client side scripts, such as javascript.
+    secure, // It ensures cookies are only sent over HTTPS
 }
 
 export const getAccessTokenCookieOptions = (): CookieOptions => ({
